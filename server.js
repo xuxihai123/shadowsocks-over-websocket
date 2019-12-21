@@ -26,12 +26,13 @@ function startMaster() {
 function startWorker(id) {
     logger.info(`started worker ${id}`);
     const options = {
-        serverAddress: server.serverAddress || config.serverAddress || '127.0.0.1',
-        serverPort: server.serverPort || config.serverPort || 8388,
-        websocketUri: server.websocketUri || config.websocketUri || '/websocket',
-        password: server.password || config.password || 'p@ssword',
-        method: server.method || config.method || 'aes-256-cfb',
+        serverAddress: server.serverAddress || process.env['SERVER_ADDRESS'] || config.serverAddress || '127.0.0.1',
+        serverPort: server.serverPort || process.env['PORT'] || config.serverPort || 8388,
+        websocketUri: server.websocketUri || process.env['WEBSOCKET_URI'] || config.websocketUri || '/websocket',
+        password: server.password || process.env['PASSWORD'] || config.password || 'p@ssword',
+        method: server.method || process.env['METHOD'] || config.method || 'aes-256-cfb',
     };
+
     // console.log(options);
     var relay = new TCPRelay(options, false);
 
