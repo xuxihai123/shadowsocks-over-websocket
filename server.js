@@ -4,6 +4,7 @@ const constants = require('./constants');
 const throng = require('throng');
 const log4js = require('log4js');
 const logger = log4js.getLogger('server');
+const config = require('./config.json');
 
 server
     .version(constants.VERSION)
@@ -16,11 +17,7 @@ server
     .option('--log-file <file>', 'log file')
     .parse(process.argv);
 
-throng({
-    workers: process.env.WEB_CONCURRENCY || 1,
-    master: startMaster,
-    start: startWorker
-});
+throng({ workers: 1, master: startMaster, start: startWorker });
 
 function startMaster() {
     logger.info('started master');
@@ -28,13 +25,15 @@ function startMaster() {
 
 function startWorker(id) {
     logger.info(`started worker ${id}`);
-    var relay = new TCPRelay({
-        serverAddress: process.env['SERVER_ADDRESS'] || server.serverAddress || '127.0.0.1',
-        serverPort: process.env['PORT'] || server.serverPort || 8388,
-        websocketUri: process.env['WEBSOCKET_URI'] || server.websocketUri || '/websocket',
-        password: process.env['PASSWORD'] || server.password || 'shadowsocks-over-websocket',
-        method: process.env['METHOD'] || server.method || 'aes-256-cfb'
-    }, false);
+    const options = {
+        serverAddress: server.serverAddress || config.serverAddress || '127.0.0.1',
+        serverPort: server.serverPort || config.serverPort || 8388,
+        websocketUri: server.websocketUri || config.websocketUri || '/websocket',
+        password: server.password || config.password || 'p@ssword',
+        method: server.method || config.method || 'aes-256-cfb',
+    };
+    // console.log(options);
+    var relay = new TCPRelay(options, false);
 
     relay.setLogLevel(server.logLevel);
     relay.setLogFile(server.logFile);

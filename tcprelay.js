@@ -108,7 +108,12 @@ function TCPRelay(config, isLocal) {
 	this.logLevel = 'error';
 	this.logFile = null;
 	this.serverName = null;
-	this.websocketUrl = `ws://${config.serverAddress}:${config.serverPort}${config.websocketUri}`;
+	if(config.tls){
+		this.websocketUrl = `wss://${config.serverAddress}:${config.serverPort}${config.websocketUri}`;
+	}else{
+		this.websocketUrl = `ws://${config.serverAddress}:${config.serverPort}${config.websocketUri}`;
+	}
+
 }
 
 TCPRelay.prototype.getStatus = function() {
@@ -378,7 +383,6 @@ TCPRelay.prototype.handleConnectionByLocal = function(connection) {
 				connection.write("\x05\x00\x00\x01\x00\x00\x00\x00\x00\x00");
 
 				stage = STAGE_CONNECTING;
-
 				serverConnection = new WebSocket(self.websocketUrl, {
 					perMessageDeflate: false
 				});
