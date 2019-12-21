@@ -108,6 +108,7 @@ function TCPRelay(config, isLocal) {
 	this.logLevel = 'error';
 	this.logFile = null;
 	this.serverName = null;
+	this.websocketUrl = `ws://${config.serverAddress}:${config.serverPort}${config.websocketUri}`;
 }
 
 TCPRelay.prototype.getStatus = function() {
@@ -181,6 +182,7 @@ TCPRelay.prototype.initServer = function() {
 			server = self.server = new WebSocket.Server({
 				host: address,
 				port: port,
+				path: config.websocketUri,
 				perMessageDeflate: false,
 				backlog: MAX_CONNECTIONS
 			});
@@ -194,7 +196,11 @@ TCPRelay.prototype.initServer = function() {
 			reject(error);
 		});
 		server.on('listening', function() {
-			self.logger.info(self.getServerName(), 'is listening on', address + ':' + port);
+			if(self.isLocal){
+				self.logger.info(self.getServerName(), 'is listening on sockss://', config.localAddress+':'+config.localPort);
+			}else{
+				self.logger.info(self.getServerName(), 'is listening on', self.websocketUrl);
+			}
 			self.status = SERVER_STATUS_RUNNING;
 			resolve();
 		});
@@ -208,6 +214,7 @@ TCPRelay.prototype.handleConnectionByServer = function(connection) {
 	var method = config.method;
 	var password = config.password;
 	var serverAddress = config.serverAddress;
+	var websocketUri = config.websocketUri;
 	var serverPort = config.serverPort;
 
 	var logger = self.logger;
@@ -319,6 +326,7 @@ TCPRelay.prototype.handleConnectionByLocal = function(connection) {
 	var method = config.method;
 	var password = config.password;
 	var serverAddress = config.serverAddress;
+	var websocketUri = config.websocketUri;
 	var serverPort = config.serverPort;
 
 	var logger = self.logger;
@@ -371,7 +379,7 @@ TCPRelay.prototype.handleConnectionByLocal = function(connection) {
 
 				stage = STAGE_CONNECTING;
 
-				serverConnection = new WebSocket('ws://' + serverAddress + ':' + serverPort, {
+				serverConnection = new WebSocket(self.websocketUrl, {
 					perMessageDeflate: false
 				});
 				serverConnection.on('open', function() {

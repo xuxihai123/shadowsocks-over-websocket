@@ -8,6 +8,7 @@ local
     .option('-k --password <password>', 'password')
     .option('-s --server-address <address>', 'server address')
     .option('-p --server-port <port>', 'server port, default: 8388')
+    .option('-u --websocket-uri <websocketUri>', 'websocket uri')
     .option('-b --local-address <address>', 'local binding address, default: 127.0.0.1')
     .option('-l --local-port <port>', 'local port, default: 1080')
     .option('--log-level <level>', 'log level(debug|info|warn|error|fatal)', /^(debug|info|warn|error|fatal)$/i, 'info')
@@ -19,6 +20,7 @@ var relay = new TCPRelay({
     localPort: local.localPort || 1080,
     serverAddress: local.serverAddress || '127.0.0.1',
     serverPort: local.serverPort || 8388,
+    websocketUri: local.websocketUri || '/websocket',
     password: local.password || 'shadowsocks-over-websocket',
     method: local.method || 'aes-256-cfb'
 }, true);
